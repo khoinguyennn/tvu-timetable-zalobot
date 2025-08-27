@@ -14,14 +14,21 @@ import {
 // Load environment variables
 dotenv.config();
 
-const BOT_TOKEN = process.env.ZALO_BOT_TOKEN || '886158540051025916:vYPIhPuMaXrtruBRHycOJhoHxJJDeztFbKuylgHEfltOZiplZJUFwQYHYhzsXBdW';
+const BOT_TOKEN = process.env.ZALO_BOT_TOKEN;
+
+if (!BOT_TOKEN) {
+  console.error('❌ ZALO_BOT_TOKEN is required!');
+  console.error('📝 Please create a .env file and add your bot token:');
+  console.error('   ZALO_BOT_TOKEN=your_bot_token_here');
+  process.exit(1);
+}
 
 async function main(): Promise<void> {
   try {
     // Initialize bot
     const bot = new ZaloBot({
-      token: BOT_TOKEN,
-      pollingInterval: 3000 // Poll every 3 seconds
+      token: BOT_TOKEN as string,
+      pollingInterval: parseInt(process.env.POLLING_INTERVAL || '3000') // Poll every 3 seconds by default
     });
 
     // Get bot info to verify connection

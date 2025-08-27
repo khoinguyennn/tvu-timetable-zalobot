@@ -25,9 +25,10 @@ cd ZaloBot
 npm install
 ```
 
-3. Bot token đã được cấu hình sẵn trong code. Để thay đổi, sửa trong `src/index.ts`:
-```typescript
-const BOT_TOKEN = 'your_bot_token_here';
+3. Tạo file `.env` và thêm bot token:
+```env
+ZALO_BOT_TOKEN=your_bot_token_here
+POLLING_INTERVAL=3000
 ```
 
 ## Sử dụng
@@ -91,18 +92,18 @@ Mở rộng class `ZaloBot` trong `src/lib/ZaloBot.ts` để thêm các method A
 
 ## ⚙️ Configuration
 
-Bot token được cấu hình trong `src/index.ts`. Bạn có thể:
+Bot sử dụng environment variables từ file `.env`:
 
-1. **Thay đổi token trực tiếp** trong code:
-```typescript
-const BOT_TOKEN = 'your_new_token_here';
-```
-
-2. **Sử dụng environment variables** (tùy chọn):
+1. **Tạo file `.env`** (bắt buộc):
 ```env
 ZALO_BOT_TOKEN=your_bot_token_here
 POLLING_INTERVAL=3000
 ```
+
+2. **Environment Variables**:
+   - `ZALO_BOT_TOKEN` (bắt buộc): Token của Zalo Bot
+   - `POLLING_INTERVAL` (tùy chọn): Polling interval tính bằng milliseconds (mặc định: 3000)
+   - `ZALO_API_URL` (tùy chọn): Custom API URL
 
 ## 🔗 API Information
 
