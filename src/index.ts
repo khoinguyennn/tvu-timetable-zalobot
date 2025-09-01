@@ -10,6 +10,8 @@ import {
   handleAudioMessage,
   handleVideoMessage
 } from './handlers/messageHandlers';
+import { handleLoginCommand } from './handlers/loginHandler';
+import { handleScheduleCommand } from './handlers/scheduleHandler';
 
 // Load environment variables
 dotenv.config();
@@ -75,6 +77,18 @@ async function main(): Promise<void> {
         }
       } catch (error) {
         console.error('❌ Error handling message:', error);
+      }
+    });
+
+    // Add command handlers
+    bot.onMessage(async (event) => {
+      if (event.event_name === 'message.text.received') {
+        const text = event.message.text;
+        if (text?.startsWith('/login')) {
+          await handleLoginCommand(event, bot);
+        } else if (text?.startsWith('/tkb')) {
+          await handleScheduleCommand(event, bot);
+        }
       }
     });
 
