@@ -11,6 +11,7 @@ export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Pro
 
   try {
     const scheduleService = ScheduleService.getInstance();
+    scheduleService.setUserId(message.from.id); // Thêm userId cho việc refresh token
     const response = await scheduleService.getWeeklySchedule();
 
     const today = new Date();
