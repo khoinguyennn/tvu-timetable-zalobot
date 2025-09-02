@@ -1,15 +1,7 @@
 import dotenv from 'dotenv';
 import { ZaloBot } from './lib/ZaloBot';
 import { ZaloEvent } from './types/zalo';
-import {
-  handleTextMessage,
-  handleImageMessage,
-  handleStickerMessage,
-  handleLocationMessage,
-  handleFileMessage,
-  handleAudioMessage,
-  handleVideoMessage
-} from './handlers/messageHandlers';
+import { handleTextMessage } from './handlers/messageHandlers';
 import { handleLoginCommand } from './handlers/loginHandler';
 import { handleScheduleCommand } from './handlers/scheduleHandler';
 import { NotificationService } from './services/notificationService';
@@ -56,30 +48,11 @@ async function main(): Promise<void> {
       console.log('👤 From user:', event.message.from.display_name);
 
       try {
-        switch (event.event_name) {
-          case 'message.text.received':
-            await handleTextMessage(event, bot);
-            break;
-          case 'message.image.received':
-            await handleImageMessage(event);
-            break;
-          case 'message.sticker.received':
-            await handleStickerMessage(event);
-            break;
-          case 'message.location.received':
-            await handleLocationMessage(event);
-            break;
-          case 'message.file.received':
-            await handleFileMessage(event);
-            break;
-          case 'message.audio.received':
-            await handleAudioMessage(event);
-            break;
-          case 'message.video.received':
-            await handleVideoMessage(event);
-            break;
-          default:
-            console.log('🔄 Unhandled event type:', event.event_name);
+        // Hiện tại chỉ xử lý tin nhắn văn bản
+        if (event.event_name === 'message.text.received') {
+          await handleTextMessage(event, bot);
+        } else {
+          console.log('🔄 Unhandled event type:', event.event_name);
         }
       } catch (error) {
         console.error('❌ Error handling message:', error);

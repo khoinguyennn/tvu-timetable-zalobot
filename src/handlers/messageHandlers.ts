@@ -1,6 +1,7 @@
 import { ZaloEvent } from '../types/zalo';
 import { ZaloBot } from '../lib/ZaloBot';
 import { NotificationService } from '../services/notificationService';
+import { SessionManager } from '../services/sessionManager';
 
 /**
  * Handle text messages
@@ -27,6 +28,8 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
 • Gửi "echo [text]" để bot lặp lại tin nhắn
 • Gửi "bật thông báo" để nhận thông báo lịch học hàng ngày
 • Gửi "tắt thông báo" để tắt thông báo lịch học
+• Gửi "lưu tài khoản <username> <password>" để lưu thông tin đăng nhập TTSV
+• Gửi "xóa tài khoản" để xóa thông tin đăng nhập đã lưu
     `;
     await bot.sendMessage(chatId, helpMessage.trim());
   } else if (text.toLowerCase().includes('time') || text.toLowerCase().includes('thời gian')) {
@@ -49,71 +52,31 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
     } else {
       await bot.sendMessage(chatId, '⚠️ Bạn chưa đăng ký nhận thông báo.');
     }
+  } else if (text.toLowerCase().startsWith('lưu tài khoản')) {
+    const sessionManager = SessionManager.getInstance();
+    // Format: lưu tài khoản <username> <password>
+    const parts = text.split(' ');
+    if (parts.length === 4) {
+      const [_, __, username, password] = parts;
+      sessionManager.saveCredentials(chatId, { username, password });
+      await bot.sendMessage(chatId, '✅ Đã lưu thông tin đăng nhập của bạn. Bot sẽ tự động duy trì phiên đăng nhập.');
+      
+      // Bắt đầu phiên ngay lập tức
+      const token = await sessionManager.refreshSession(chatId);
+      if (token) {
+        sessionManager.startPingSession(chatId, token);
+      }
+    } else {
+      await bot.sendMessage(chatId, '❌ Sai cú pháp. Vui lòng sử dụng: lưu tài khoản <username> <password>');
+    }
+  } else if (text.toLowerCase() === 'xóa tài khoản') {
+    const sessionManager = SessionManager.getInstance();
+    if (sessionManager.hasStoredCredentials(chatId)) {
+      sessionManager.clearCredentials(chatId);
+      sessionManager.stopPingSession();
+      await bot.sendMessage(chatId, '✅ Đã xóa thông tin đăng nhập của bạn.');
+    } else {
+      await bot.sendMessage(chatId, '⚠️ Không có thông tin đăng nhập nào được lưu.');
+    }
   }
-}
-
-/**
- * Handle image messages
- */
-export async function handleImageMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received image message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận ảnh
-}
-
-/**
- * Handle sticker messages
- */
-export async function handleStickerMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received sticker message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận sticker
-}
-
-/**
- * Handle location messages
- */
-export async function handleLocationMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received location message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận location
-}
-
-/**
- * Handle file messages
- */
-export async function handleFileMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received file message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận file
-}
-
-/**
- * Handle audio messages
- */
-export async function handleAudioMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received audio message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận audio
-}
-
-/**
- * Handle video messages
- */
-export async function handleVideoMessage(event: ZaloEvent): Promise<void> {
-  const chatId = event.message.chat.id;
-  const userName = event.message.from.display_name;
-  console.log(`Received video message from ${userName} (${chatId})`);
-  
-  // Không cần gửi phản hồi khi nhận video
 }

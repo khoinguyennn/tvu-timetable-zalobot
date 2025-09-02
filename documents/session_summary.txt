@@ -1,0 +1,22 @@
+TÓM TẮT CƠ CHẾ PHIÊN ĐĂNG NHẬP TRÊN TTSV.TVU.EDU.VN
+
+1.  JWT Token (Access Token)
+    -   Có chứa trường exp (expiration).
+    -   Thời hạn: khoảng 2 tiếng kể từ lúc đăng nhập.
+    -   Sau khi hết hạn, cần đăng nhập lại để lấy token mới.
+2.  Idle Timeout (Hết hạn do không hoạt động)
+    -   Nếu người dùng không thao tác gì (idle) trong ~3 phút, hệ thống
+        sẽ tự động gọi API /api/auth/logout.
+    -   Khi đó sẽ hiển thị thông báo: “Phiên làm việc đã hết hạn, vui
+        lòng đăng nhập lại”.
+    -   Như vậy phiên có thể hết hạn sớm hơn nhiều so với thời hạn
+        token.
+3.  Cơ chế Ping/KeepAlive
+    -   Có API: /signalr/ping trả về {“Response”: “pong”}.
+    -   Mục đích là giữ kết nối “sống”.
+    -   Nếu không có ping hoặc tương tác khác, server coi là idle và hủy
+        session.
+4.  Kết luận
+    -   Token có hạn dài (2h), nhưng session idle chỉ 3 phút.
+    -   Để tránh bị logout, cần gửi request nhỏ (ping giả lập) khoảng
+        mỗi 2 phút để giữ phiên hoạt động.

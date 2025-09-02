@@ -3,6 +3,7 @@ import { ZaloBot } from '../lib/ZaloBot';
 import { TVULoginCredentials, TVUUserInfo } from '../types/tvu';
 import axios from 'axios';
 import { ScheduleService } from '../services/scheduleService';
+import { SessionManager } from '../services/sessionManager';
 
 export async function handleLoginCommand(event: ZaloEvent, bot: ZaloBot): Promise<void> {
   const { message } = event;
@@ -22,9 +23,21 @@ export async function handleLoginCommand(event: ZaloEvent, bot: ZaloBot): Promis
 
   try {
     const userInfo = await loginToTVU(username, password);
+    
+    // Lưu thông tin đăng nhập vào SessionManager
+    const sessionManager = SessionManager.getInstance();
+    sessionManager.saveCredentials(message.from.id, { username, password });
+
+    // Bắt đầu phiên tự động
+    const token = await sessionManager.refreshSession(message.from.id);
+    if (token) {
+      sessionManager.startPingSession(message.from.id, token);
+    }
+
     await bot.sendMessage(
       message.from.id, 
-      `Đăng nhập thành công!\nChào mừng ${userInfo.FullName} 👋\nMSSV: ${userInfo.userName}\nVai trò: ${userInfo.roles}`
+      `Đăng nhập thành công!\nChào mừng ${userInfo.FullName} 👋\nMSSV: ${userInfo.userName}\nVai trò: ${userInfo.roles}\n\n` +
+      '✅ Thông tin đăng nhập của bạn đã được lưu. Bot sẽ tự động duy trì phiên đăng nhập.'
     );
   } catch (error: any) {
     console.error('Login failed:', error);
