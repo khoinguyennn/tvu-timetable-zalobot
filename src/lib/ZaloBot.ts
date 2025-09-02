@@ -137,8 +137,6 @@ export class ZaloBot {
           await this.processEvents([response.result]);
           // Update offset for next polling
           this.lastOffset = this.lastOffset + 1;
-        } else if (!response.ok) {
-          console.error('API Error: Response not ok');
         }
       } catch (error) {
         console.error('Polling error:', error);
