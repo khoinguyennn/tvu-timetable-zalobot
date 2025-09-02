@@ -12,6 +12,7 @@ import {
 } from './handlers/messageHandlers';
 import { handleLoginCommand } from './handlers/loginHandler';
 import { handleScheduleCommand } from './handlers/scheduleHandler';
+import { NotificationService } from './services/notificationService';
 
 // Load environment variables
 dotenv.config();
@@ -43,6 +44,11 @@ async function main(): Promise<void> {
     } catch (error) {
       console.log('⚠️  Could not fetch bot info, but proceeding with message handling...');
     }
+
+    // Initialize and start notification service
+    const notificationService = NotificationService.getInstance(bot);
+    notificationService.startScheduler();
+    console.log('📅 Notification service started');
 
     // Set up message handlers
     bot.onMessage(async (event: ZaloEvent) => {

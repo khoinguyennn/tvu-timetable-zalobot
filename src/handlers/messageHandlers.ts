@@ -1,5 +1,6 @@
 import { ZaloEvent } from '../types/zalo';
 import { ZaloBot } from '../lib/ZaloBot';
+import { NotificationService } from '../services/notificationService';
 
 /**
  * Handle text messages
@@ -12,6 +13,8 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
 
   console.log(`Received text message from ${event.message.from.display_name} (${chatId}): ${text}`);
 
+  const notificationService = NotificationService.getInstance(bot);
+
   // Basic echo bot functionality
   if (text.toLowerCase().includes('hello') || text.toLowerCase().includes('hi')) {
     await bot.sendMessage(chatId, 'Xin chào! Tôi là Zalo Bot. Tôi có thể giúp gì cho bạn?');
@@ -22,6 +25,8 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
 • Gửi "help" để xem hướng dẫn
 • Gửi "time" để xem thời gian hiện tại
 • Gửi "echo [text]" để bot lặp lại tin nhắn
+• Gửi "bật thông báo" để nhận thông báo lịch học hàng ngày
+• Gửi "tắt thông báo" để tắt thông báo lịch học
     `;
     await bot.sendMessage(chatId, helpMessage.trim());
   } else if (text.toLowerCase().includes('time') || text.toLowerCase().includes('thời gian')) {
@@ -32,6 +37,18 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
   } else if (text.toLowerCase().startsWith('echo ')) {
     const echoText = text.substring(5);
     await bot.sendMessage(chatId, `🔄 Echo: ${echoText}`);
+  } else if (text.toLowerCase() === 'bật thông báo') {
+    if (notificationService.subscribe(chatId)) {
+      await bot.sendMessage(chatId, '✅ Đã bật thông báo lịch học hàng ngày. Bạn sẽ nhận được thông báo vào 6:00 sáng.');
+    } else {
+      await bot.sendMessage(chatId, '⚠️ Bạn đã đăng ký nhận thông báo từ trước.');
+    }
+  } else if (text.toLowerCase() === 'tắt thông báo') {
+    if (notificationService.unsubscribe(chatId)) {
+      await bot.sendMessage(chatId, '❌ Đã tắt thông báo lịch học hàng ngày.');
+    } else {
+      await bot.sendMessage(chatId, '⚠️ Bạn chưa đăng ký nhận thông báo.');
+    }
   }
 }
 
