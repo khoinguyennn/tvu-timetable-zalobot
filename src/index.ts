@@ -55,22 +55,22 @@ async function main(): Promise<void> {
             await handleTextMessage(event, bot);
             break;
           case 'message.image.received':
-            await handleImageMessage(event, bot);
+            await handleImageMessage(event);
             break;
           case 'message.sticker.received':
-            await handleStickerMessage(event, bot);
+            await handleStickerMessage(event);
             break;
           case 'message.location.received':
-            await handleLocationMessage(event, bot);
+            await handleLocationMessage(event);
             break;
           case 'message.file.received':
-            await handleFileMessage(event, bot);
+            await handleFileMessage(event);
             break;
           case 'message.audio.received':
-            await handleAudioMessage(event, bot);
+            await handleAudioMessage(event);
             break;
           case 'message.video.received':
-            await handleVideoMessage(event, bot);
+            await handleVideoMessage(event);
             break;
           default:
             console.log('🔄 Unhandled event type:', event.event_name);

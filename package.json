@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Zalo Chatbot built with TypeScript",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

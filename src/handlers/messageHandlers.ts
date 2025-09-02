@@ -32,74 +32,71 @@ export async function handleTextMessage(event: ZaloEvent, bot: ZaloBot): Promise
   } else if (text.toLowerCase().startsWith('echo ')) {
     const echoText = text.substring(5);
     await bot.sendMessage(chatId, `🔄 Echo: ${echoText}`);
-  } else {
-    // Default response
-    await bot.sendMessage(chatId, `Tôi đã nhận được tin nhắn: "${text}"\n\nGửi "help" để xem các lệnh có sẵn.`);
   }
 }
 
 /**
  * Handle image messages
  */
-export async function handleImageMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleImageMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received image message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '📸 Tôi đã nhận được hình ảnh của bạn! Cảm ơn bạn đã chia sẻ.');
+  // Không cần gửi phản hồi khi nhận ảnh
 }
 
 /**
  * Handle sticker messages
  */
-export async function handleStickerMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleStickerMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received sticker message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '😊 Sticker rất cute! Cảm ơn bạn!');
+  // Không cần gửi phản hồi khi nhận sticker
 }
 
 /**
  * Handle location messages
  */
-export async function handleLocationMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleLocationMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received location message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '📍 Cảm ơn bạn đã chia sẻ vị trí! Tôi đã ghi nhận.');
+  // Không cần gửi phản hồi khi nhận location
 }
 
 /**
  * Handle file messages
  */
-export async function handleFileMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleFileMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received file message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '📄 Tôi đã nhận được file từ bạn. Cảm ơn!');
+  // Không cần gửi phản hồi khi nhận file
 }
 
 /**
  * Handle audio messages
  */
-export async function handleAudioMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleAudioMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received audio message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '🎵 Tôi đã nhận được tin nhắn voice từ bạn!');
+  // Không cần gửi phản hồi khi nhận audio
 }
 
 /**
  * Handle video messages
  */
-export async function handleVideoMessage(event: ZaloEvent, bot: ZaloBot): Promise<void> {
+export async function handleVideoMessage(event: ZaloEvent): Promise<void> {
   const chatId = event.message.chat.id;
   const userName = event.message.from.display_name;
   console.log(`Received video message from ${userName} (${chatId})`);
   
-  await bot.sendMessage(chatId, '🎥 Video rất thú vị! Cảm ơn bạn đã chia sẻ.');
+  // Không cần gửi phản hồi khi nhận video
 }

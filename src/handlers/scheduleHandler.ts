@@ -13,12 +13,8 @@ export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Pro
     const scheduleService = ScheduleService.getInstance();
     const response = await scheduleService.getWeeklySchedule();
 
-    console.log('Schedule response:', JSON.stringify(response, null, 2));
-
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
-
-    console.log('Looking for schedule on:', formattedDate);
 
     // Find current week's schedule
     const currentWeek = response.data.ds_tuan_tkb.find(week => {
@@ -29,13 +25,8 @@ export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Pro
       const endDate = new Date(parseInt(endYear), parseInt(endMonth) - 1, parseInt(endDay));
       
       const isCurrentWeek = today >= startDate && today <= endDate;
-      if (isCurrentWeek) {
-        console.log('Found matching week:', week.thong_tin_tuan);
-      }
       return isCurrentWeek;
     });
-
-    console.log('Current week:', currentWeek);
 
     if (!currentWeek) {
       await bot.sendMessage(message.from.id, 'Không tìm thấy thời khóa biểu cho tuần hiện tại.');
@@ -46,15 +37,10 @@ export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Pro
     const todayClasses = currentWeek.ds_thoi_khoa_bieu.filter(schedule => {
       const scheduleDate = new Date(schedule.ngay_hoc);
       const isToday = scheduleDate.toISOString().split('T')[0] === formattedDate;
-      if (isToday) {
-        console.log('Found class:', schedule.ten_mon);
-      }
       return isToday;
     });
 
-    console.log(`Found ${todayClasses.length} classes for today`);
-
-      if (todayClasses.length === 0) {
+    if (todayClasses.length === 0) {
       await bot.sendMessage(message.from.id, 'Hôm nay không có lịch học! 🎉');
       return;
     }    // Sort classes by period
