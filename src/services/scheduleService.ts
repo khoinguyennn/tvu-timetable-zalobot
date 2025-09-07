@@ -94,11 +94,35 @@ export class ScheduleService {
 
   public formatSchedule(schedule: ClassSchedule): string {
     const dayMap = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    return `📚 ${schedule.ten_mon}
-�️ ${dayMap[schedule.thu_kieu_so]}
-�🕐 Tiết: ${schedule.tiet_bat_dau}-${schedule.tiet_bat_dau + schedule.so_tiet - 1}
-👨‍🏫 GV: ${schedule.ten_giang_vien}
-🏫 Phòng: ${schedule.ma_phong}
-📝 Nhóm: ${schedule.ma_nhom}`;
+    
+    // Thêm các biểu tượng ngẫu nhiên cho môn học
+    const subjectEmojis = ['📚', '📖', '📗', '📘', '📙', '📔', '📕', '🔬', '💻', '🧮', '🧪', '📐', '📏'];
+    const roomEmojis = ['🏫', '🏢', '🏤', '🏛️', '🏗️', '🏠'];
+    const teacherEmojis = ['👨‍🏫', '👩‍🏫', '👨‍🎓', '👩‍🎓', '👨‍🔬', '👩‍🔬'];
+    
+    const getRandomEmoji = (list: string[]) => list[Math.floor(Math.random() * list.length)];
+    
+    // Tạo thời gian dễ đọc hơn
+    const startTiet = schedule.tiet_bat_dau;
+    const endTiet = schedule.tiet_bat_dau + schedule.so_tiet - 1;
+    
+    // Thời gian tiết học (ước lượng)
+    const tietToTime = (tiet: number) => {
+      const startHours = [7, 7, 8, 9, 10, 13, 13, 14, 15, 16, 18, 18, 19, 20];
+      const startMins =  [0, 30, 20, 10, 0, 0, 30, 20, 10, 0, 0, 30, 20, 10];
+      if (tiet >= 1 && tiet <= startHours.length) {
+        return `${startHours[tiet-1]}:${startMins[tiet-1].toString().padStart(2, '0')}`;
+      }
+      return "";
+    };
+    
+    const timeStr = `${tietToTime(startTiet)} - ${tietToTime(endTiet + 1)}`;
+    
+    return `${getRandomEmoji(subjectEmojis)} *${schedule.ten_mon}*\n` +
+           `📆 ${dayMap[schedule.thu_kieu_so]}\n` +
+           `⏰ Tiết ${startTiet}-${endTiet} (${timeStr})\n` +
+           `${getRandomEmoji(teacherEmojis)} ${schedule.ten_giang_vien}\n` +
+           `${getRandomEmoji(roomEmojis)} Phòng: ${schedule.ma_phong}\n` +
+           `📝 Nhóm: ${schedule.ma_nhom}`;
   }
 }
