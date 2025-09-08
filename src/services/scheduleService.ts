@@ -93,8 +93,6 @@ export class ScheduleService {
   }
 
   public formatSchedule(schedule: ClassSchedule): string {
-    const dayMap = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    
     // Thêm các biểu tượng ngẫu nhiên cho môn học
     const subjectEmojis = ['📚', '📖', '📗', '📘', '📙', '📔', '📕', '🔬', '💻', '🧮', '🧪', '📐', '📏'];
     const roomEmojis = ['🏫', '🏢', '🏤', '🏛️', '🏗️', '🏠'];
@@ -118,10 +116,9 @@ export class ScheduleService {
     
     const timeStr = `${tietToTime(startTiet)} - ${tietToTime(endTiet + 1)}`;
     
-    return `${getRandomEmoji(subjectEmojis)} *${schedule.ten_mon}*\n` +
-           `📆 ${dayMap[schedule.thu_kieu_so]}\n` +
+    return `${getRandomEmoji(subjectEmojis)} Môn: ${schedule.ten_mon}\n` +
            `⏰ Tiết ${startTiet}-${endTiet} (${timeStr})\n` +
-           `${getRandomEmoji(teacherEmojis)} ${schedule.ten_giang_vien}\n` +
+           `${getRandomEmoji(teacherEmojis)} Giảng viên: ${schedule.ten_giang_vien}\n` +
            `${getRandomEmoji(roomEmojis)} Phòng: ${schedule.ma_phong}\n` +
            `📝 Nhóm: ${schedule.ma_nhom}`;
   }
