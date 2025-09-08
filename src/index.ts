@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import express from 'express';
 import { ZaloBot } from './lib/ZaloBot';
 import { ZaloEvent } from './types/zalo';
 import { handleTextMessage } from './handlers/messageHandlers';
@@ -10,6 +11,7 @@ import { NotificationService } from './services/notificationService';
 dotenv.config();
 
 const BOT_TOKEN = process.env.ZALO_BOT_TOKEN;
+const PORT = process.env.PORT || 3000;
 
 if (!BOT_TOKEN) {
   console.error('❌ ZALO_BOT_TOKEN is required!');
@@ -20,6 +22,27 @@ if (!BOT_TOKEN) {
 
 async function main(): Promise<void> {
   try {
+    // Setup Express server for health checks (required by Heroku)
+    const app = express();
+    
+    app.get('/', (_req, res) => {
+      res.json({ 
+        status: 'ZaloBot TVU is running',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '1.0.0'
+      });
+    });
+
+    app.get('/health', (_req, res) => {
+      res.json({ status: 'healthy' });
+    });
+
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`🌐 Health check server running on port ${PORT}`);
+    });
+
     // Initialize bot
     const bot = new ZaloBot({
       token: BOT_TOKEN as string,
