@@ -53,6 +53,10 @@ export class SessionManager {
     return this.tokens.get(userId) || null;
   }
 
+  public setToken(userId: string, token: string): void {
+    this.tokens.set(userId, token);
+  }
+
   private async retryRequest(request: () => Promise<any>, retries = this.MAX_RETRIES): Promise<any> {
     try {
       return await request();
@@ -74,7 +78,7 @@ export class SessionManager {
     }
 
     try {
-      // Tạo credentials object theo format yêu cầu
+      // Tạo credentials object theo format yêu cầu (giống loginHandler)
       const loginCredentials = {
         username: credentials.username,
         password: credentials.password,
@@ -84,17 +88,54 @@ export class SessionManager {
       // Encode credentials to Base64
       const code = Buffer.from(JSON.stringify(loginCredentials)).toString('base64');
 
-      // Gọi API đăng nhập với retry mechanism
+      // Gọi API đăng nhập với retry mechanism (giống loginHandler)
       const response = await this.retryRequest(() => 
         this.axiosInstance.get('https://ttsv.tvu.edu.vn/api/pn-signin', {
-          params: { code }
+          params: { 
+            code,
+            mgr: 1  // Thêm param này giống loginHandler
+          },
+          headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          maxRedirects: 0,
+          validateStatus: (status) => status === 302  // Expect redirect như loginHandler
         })
       );
 
-      if (response.data?.Token) {
-        console.log(`Successfully refreshed session for user ${userId}`);
-        return response.data.Token;
+      // Xử lý redirect response giống loginHandler
+      const location = response.headers['location'];
+      if (!location) {
+        console.error('Refresh failed: No location header found');
+        return null;
       }
+
+      // Parse user information from location URL
+      const urlParams = new URLSearchParams(location.split('?')[1]);
+      const currUser = urlParams.get('CurrUser');
+      if (!currUser) {
+        console.error('Refresh failed: No CurrUser parameter found');
+        return null;
+      }
+
+      // Validate and decode CurrUser parameter
+      if (!this.isValidBase64(currUser)) {
+        console.error('Refresh failed: Invalid CurrUser parameter');
+        return null;
+      }
+
+      try {
+        const userInfo = JSON.parse(Buffer.from(currUser, 'base64').toString('utf-8'));
+        if (userInfo.access_token) {
+          console.log(`Successfully refreshed session for user ${userId}`);
+          return userInfo.access_token;
+        }
+      } catch (decodeError) {
+        console.error('Refresh failed: Could not decode user info', decodeError);
+        return null;
+      }
+
     } catch (error) {
       if (error instanceof AxiosError) {
         console.error(`Failed to refresh session for user ${userId}: ${error.code} - ${error.message}`);
@@ -104,6 +145,14 @@ export class SessionManager {
     }
 
     return null;
+  }
+
+  private isValidBase64(str: string): boolean {
+    try {
+      return Buffer.from(str, 'base64').toString('base64') === str;
+    } catch {
+      return false;
+    }
   }
 
   public startPingSession(userId: string, token: string): void {

@@ -1,6 +1,7 @@
 import { ZaloEvent } from '../types/zalo';
 import { ZaloBot } from '../lib/ZaloBot';
 import { ScheduleService } from '../services/scheduleService';
+import { SessionManager } from '../services/sessionManager';
 
 export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Promise<void> {
   const { message } = event;
@@ -14,7 +15,19 @@ export async function handleScheduleCommand(event: ZaloEvent, bot: ZaloBot): Pro
 
   try {
     const scheduleService = ScheduleService.getInstance();
-    scheduleService.setUserId(message.from.id); // Thêm userId cho việc refresh token
+    scheduleService.setUserId(message.from.id);
+    
+    // Kiểm tra xem user đã đăng nhập chưa
+    const sessionManager = SessionManager.getInstance();
+    
+    if (!sessionManager.hasStoredCredentials(message.from.id)) {
+      await bot.sendMessage(
+        message.from.id, 
+        '🔐 Bạn chưa đăng nhập!\n\nVui lòng đăng nhập trước khi xem lịch học:\n📝 `/login <mssv> <mật_khẩu>`\n\nVí dụ: `/login 2051052001 password123`'
+      );
+      return;
+    }
+    
     const response = await scheduleService.getWeeklySchedule();
 
     // Tính toán ngày cần xem (hôm nay hoặc ngày mai)

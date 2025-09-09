@@ -4,7 +4,6 @@ import { SessionManager } from './sessionManager';
 
 export class ScheduleService {
   private static instance: ScheduleService;
-  private token: string = '';
   private userId: string = '';
 
   private constructor() {}
@@ -16,36 +15,23 @@ export class ScheduleService {
     return ScheduleService.instance;
   }
 
-  public setToken(token: string) {
-    this.token = token;
-  }
-
   public setUserId(userId: string) {
     this.userId = userId;
   }
 
-  private async handleTokenExpiration(): Promise<string | null> {
-    if (!this.userId) {
-      console.error('No userId set for token refresh');
-      return null;
-    }
-
-    console.log('Token expired, attempting to refresh...');
-    const sessionManager = SessionManager.getInstance();
-    const newToken = await sessionManager.refreshSession(this.userId);
-    
-    if (newToken) {
-      console.log('Token refreshed successfully');
-      this.token = newToken;
-      return newToken;
-    }
-    
-    return null;
+  // Backward compatibility - không cần thiết nữa vì dùng SessionManager
+  public setToken(_token: string) {
+    // Legacy method - token giờ được quản lý bởi SessionManager
+    console.log('setToken called - token now managed by SessionManager');
   }
 
   public async getWeeklySchedule(semester: number = 20251): Promise<ScheduleResponse> {
-    if (!this.token) {
-      throw new Error('Token not set. Please login first.');
+    // Lấy token từ SessionManager thay vì dùng token cục bộ
+    const sessionManager = SessionManager.getInstance();
+    let currentToken = sessionManager.getCurrentToken(this.userId);
+    
+    if (!currentToken) {
+      throw new Error('No active session. Please login first.');
     }
 
     console.log('Getting schedule for semester:', semester);
@@ -71,7 +57,7 @@ export class ScheduleService {
         },
         {
           headers: {
-            'Authorization': `Bearer ${this.token}`,
+            'Authorization': `Bearer ${currentToken}`,
             'Content-Type': 'application/json'
           }
         }
@@ -80,12 +66,20 @@ export class ScheduleService {
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 401) {
-        // Thử refresh token
-        const newToken = await this.handleTokenExpiration();
+        console.log('Token expired, attempting auto-refresh...');
+        
+        // Refresh token qua SessionManager
+        const newToken = await sessionManager.refreshSession(this.userId);
         if (newToken) {
+          console.log('Token refreshed successfully, retrying request...');
+          
+          // Đồng bộ token mới
+          sessionManager.setToken(this.userId, newToken);
+          
           // Thử lại request với token mới
-          console.log('Retrying request with new token...');
           return this.getWeeklySchedule(semester);
+        } else {
+          throw new Error('Token expired and refresh failed. Please login again.');
         }
       }
       throw new Error(`Failed to get schedule: ${error instanceof Error ? error.message : 'Unknown error'}`);

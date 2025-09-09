@@ -28,15 +28,20 @@ export async function handleLoginCommand(event: ZaloEvent, bot: ZaloBot): Promis
     const sessionManager = SessionManager.getInstance();
     sessionManager.saveCredentials(message.from.id, { username, password });
 
-    // Bắt đầu phiên tự động
-    const token = await sessionManager.refreshSession(message.from.id);
-    if (token) {
-      sessionManager.startPingSession(message.from.id, token);
-    }
+    // Đồng bộ token từ login vào SessionManager và ScheduleService
+    const token = userInfo.access_token;
+    sessionManager.setToken(message.from.id, token);
+    
+    const scheduleService = ScheduleService.getInstance();
+    scheduleService.setToken(token);
+    scheduleService.setUserId(message.from.id);
+
+    // Bắt đầu phiên ping tự động
+    sessionManager.startPingSession(message.from.id, token);
 
     await bot.sendMessage(
       message.from.id, 
-      `Đăng nhập thành công!\nChào mừng ${userInfo.FullName} 👋\nMSSV: ${userInfo.userName}\nVai trò: ${userInfo.roles}\n\n` +
+      `Đăng nhập thành công!\nChào mừng ${userInfo.FullName} 👋\nMSSV: ${userInfo.userName}\n\n` +
       '✅ Thông tin đăng nhập của bạn đã được lưu. Bot sẽ tự động duy trì phiên đăng nhập.'
     );
   } catch (error: any) {
